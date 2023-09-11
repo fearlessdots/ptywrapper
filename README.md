@@ -18,8 +18,9 @@ This module was created to address specific challenges I encountered during deve
 
 - **Exit Code Handling**: `ptywrapper` captures the exit code of the command, which can be used to determine whether the command completed successfully.
 
-- **Testing Support**: `ptywrapper` includes test files in the `./tests` subfolder that demonstrate how to use the module and can be used for testing purposes.
+- **Custom Environment**: `ptywrapper` allows you to specify a custom environment for the command being run. This can be useful if you need to set specific environment variables or modify the existing environment in some way. If no custom environment is provided, the command will be run with the current environment (as returned by `os.Environ()`).
 
+- **Testing Support**: `ptywrapper` includes test files in the `./tests` subfolder that demonstrate how to use the module and can be used for testing purposes.
 
 ## Installation
 
@@ -92,6 +93,71 @@ However, it's important to note that even when the output is discarded in this w
 
 This feature can be particularly useful when you want to run a command silently (without printing its output), but still need to use the output for further processing or logging.
 
+To append custom environment variables to the current environment and use them with a command, the following code can be used:
+
+```go
+import (
+  "github.com/fearlessdots/ptywrapper"
+  "fmt"
+  "os"
+)
+
+func main() {
+  // Get the current environment
+  currentEnv := os.Environ()
+
+  // Define custom environment variables
+  customEnv := map[string]string{
+    "FOO": "bar",
+    "BAZ": "qux",
+  }
+
+  // Append custom environment variables to the current environment
+  for key, value := range customEnv {
+    currentEnv = append(currentEnv, key+"="+value)
+  }
+
+  cmd := &ptywrapper.Command{
+    Entry: "printenv",
+    Args: []string{},
+    Env: currentEnv,
+  }
+
+  completedCmd, err := cmd.RunInPTY()
+  if err != nil {
+    fmt.Println("Error:", err)
+    return
+  }
+
+  fmt.Println("Command output:", completedCmd.Output)
+}
+```
+
+Finally, here's an example of how to use only the custom environment:
+
+```go
+import (
+  "github.com/fearlessdots/ptywrapper"
+  "fmt"
+)
+
+func main() {
+  cmd := &ptywrapper.Command{
+    Entry: "printenv",
+    Args: []string{},
+    Env: []string{"FOO=bar", "BAZ=qux"},
+  }
+
+  completedCmd, err := cmd.RunInPTY()
+  if err != nil {
+    fmt.Println("Error:", err)
+    return
+  }
+
+  fmt.Println("Command output:", completedCmd.Output)
+}
+```
+
 ### The `Command` Struct
 
 The `Command` struct represents a command to be run in a pseudo-terminal (PTY). It has several fields that can be set before running the command and some that are populated after the command has been run.
@@ -101,6 +167,8 @@ The `Command` struct represents a command to be run in a pseudo-terminal (PTY). 
 - `Entry`: This is the command to be run. It should be a string representing the path to the executable.
 
 - `Args`: This is an array of strings representing the arguments to be passed to the command.
+
+- `Env`: This is an array of strings representing the environment variables for the command. Each string should be in the format `KEY=value`. If `Env` is not set, the command will be run with the current environment (as returned by `os.Environ()`).
 
 - `Discard`: This is a boolean that determines whether the command's output should be discarded. If set to `true`, the command's output will not be printed to the standard output during execution, but it will still be captured and stored in the `Output` field.
 
@@ -114,12 +182,11 @@ The `Command` struct represents a command to be run in a pseudo-terminal (PTY). 
 
 #### Persistence of Fields in the `Command` Struct
 
-After executing `command.RunInPTY()`, the fields that were available before running the command (`Entry`, `Args`, and `Discard`) remain accessible. They retain the values that were set before the command was run.
+After executing `command.RunInPTY()`, the fields that were available before running the command (`Entry`, `Args`, `Env`, and `Discard`) remain accessible. They retain the values that were set before the command was run.
 
-This means you can still access the original command (`Entry`), its arguments (`Args`), and the discard setting (`Discard`) even after the command has been executed. These fields are not modified by the execution of the command.
+This means you can still access the original command (`Entry`), its arguments (`Args`), the environment variables (`Env`), and the discard setting (`Discard`) even after the command has been executed. These fields are not modified by the execution of the command.
 
-In addition to these, the fields that are populated after the command has been run (`Completed`, `Output`, and `ExitCode`) are also available. This allows you to access a comprehensive set of information about the command and its execution, including what the command was, what arguments it was run with, whether its output was discarded, whether it has completed, what output it produced, and what its exit code was.
-
+In addition to these, the fields that are populated after the command has been run (`Completed`, `Output`, and `ExitCode`) are also available. This allows you to access a comprehensive set of information about the command and its execution, including what the command was, what arguments it was run with, what environment variables it used, whether its output was discarded, whether it has completed, what output it produced, and what its exit code was.
 
 ## Inner Workings
 
@@ -131,7 +198,7 @@ The `ptywrapper` module is composed of several key components:
 
 - `Writer`: This type is a struct that wraps two file pointers (source and destination) and a context. It implements the `io.Writer` interface and is used to copy data between the source and destination.
 
-- `Command`: This type is a struct that represents a command to be run in a PTY. It includes fields for the command entry, arguments, a flag to discard output, a flag to indicate if the command has completed, the command output, and the exit code.
+- `Command`: This type is a struct that represents a command to be run in a PTY. It includes fields for the command entry, arguments, environment variables, a flag to discard output, a flag to indicate if the command has completed, the command output, and the exit code.
 
 ### Functions
 
@@ -158,26 +225,6 @@ These goroutines work together to ensure that the command is executed in a PTY a
 ## Testing
 
 The `./tests` subfolder in the source code contains test files that demonstrate how to use the `ptywrapper` module.
-
-### test_output.go
-
-This test file runs a command (`/usr/bin/cat ./test/test.json`) using `ptywrapper` and prints the command's output. It demonstrates how to handle the command's exit code and output.
-
-You can run this test with the following command:
-
-```bash
-go run ./tests/test_output.go
-```
-
-### test.go
-
-This test file runs two commands (/usr/bin/bash and /usr/bin/ipython) using ptywrapper. It demonstrates how to run multiple commands and handle any errors that might occur.
-
-You can run this test with the following command:
-
-```bash
-go run ./tests/test.go
-```
 
 ## Contributing
 
