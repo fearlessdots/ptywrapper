@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1,
+    "name": "NeuroLink VR System",
+    "brand": "SynthTech",
+    "price": 1499,
+    "colors": ["Onyx Black", "Cobalt Blue", "Lunar Silver"],
+    "features": ["High-resolution display", "Immersive virtual reality experience", "Advanced haptic feedback"]
+  },
+  {
+    "id": 2,
+    "name": "QuantumX Gaming Laptop",
+    "brand": "Astrum",
+    "price": 1999,
+    "colors": ["Shadow Black", "Cosmic Silver", "Stellar Red"],
+    "features": ["Powerful Intel i9 processor", "NVIDIA RTX 3080 graphics", "16GB RAM", "1TB SSD"]
+  },
+  {
+    "id": 3,
+    "name": "LumenX Smart Mirror",
+    "brand": "EvoTech",
+    "price": 899,
+    "colors": ["Black"],
+    "features": ["Interactive touchscreen display", "Built-in voice assistant", "Health and fitness tracking", "Smart home integration"]
+  }
+]
