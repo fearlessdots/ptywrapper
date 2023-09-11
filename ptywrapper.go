@@ -86,6 +86,7 @@ func (w *Writer) Write(p []byte) (n int, err error) {
 type Command struct {
   Entry       string
   Args        []string
+  Env         []string
   Discard     bool // Discard output (will still save it as a variable)
   Completed   bool
   Output      string
@@ -98,6 +99,13 @@ func (command *Command) RunInPTY() (Command, error) {
   c.SysProcAttr = &syscall.SysProcAttr{
     Setctty: true, // Set controlling terminal to the pseudo terminal
     Setsid: true, // Start the command in a new session
+  }
+
+  // Set environment (use custom environment if available)
+  if command.Env != nil {
+    c.Env = command.Env
+  } else {
+    c.Env = os.Environ()
   }
 
   // Open a pty
