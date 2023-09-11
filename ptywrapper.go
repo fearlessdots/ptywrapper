@@ -208,7 +208,7 @@ func (command *Command) RunInPTY() (Command, error) {
         // NOTE: EAGAIN means that there is no data available to read, so it's not really an error in this case
         if pathErr, ok := err.(*os.PathError); ok && pathErr.Err == syscall.EAGAIN {
           // Sleep for 50 milliseconds (to slow down the loop but without removing too much fluidity from user input)
-          time.Sleep(time.Millisecond * 50)
+          time.Sleep(time.Millisecond * 10)
 
           continue
         } else {
@@ -249,7 +249,7 @@ func (command *Command) RunInPTY() (Command, error) {
         // NOTE: EAGAIN means that there is no data available to read, so it's not really an error in this case
         if pathErr, ok := err.(*os.PathError); ok && pathErr.Err == syscall.EAGAIN {
           // Sleep for 50 milliseconds (to slow down the loop but without removing too much fluidity from the output)
-          time.Sleep(time.Millisecond * 50)
+          time.Sleep(time.Millisecond * 10)
 
           continue
         } else {
