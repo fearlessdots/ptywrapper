@@ -1,6 +1,6 @@
 module github.com/fearlessdots/ptywrapper
 
-go 1.21.0
+go 1.21
 
 require (
 	github.com/creack/pty v1.1.18
